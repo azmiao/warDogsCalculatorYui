@@ -8,7 +8,6 @@
 - 缺参引导：只发 '火力计算 迫击炮' 后，按提示依次补全炮位与目标坐标
 """
 import time
-from typing import Optional
 
 from yuiChyan import YuiChyan, CQEvent
 from yuiChyan.exception import CommandErrorException
@@ -40,14 +39,6 @@ def _cleanup_sessions():
             _sessions.pop(key, None)
 
 
-def _parse_weapon_and_numbers(text: str):
-    """从触发前缀后的文本中解析武器与数字。
-
-    返回 (weapon, numbers)；武器缺失时 weapon 为 None。
-    """
-    return parse_weapon_and_numbers(text)
-
-
 async def _send_solution(bot: YuiChyan, ev: CQEvent, weapon, origin: Point, target: Point):
     """计算并发送射击诸元结果（图片，失败时降级为文本）。"""
     solution = calculate(weapon, origin, target)
@@ -66,7 +57,7 @@ async def fire_calc(bot: YuiChyan, ev: CQEvent):
     _cleanup_sessions()
     key = (int(ev.group_id), int(ev.user_id))
 
-    weapon, numbers = _parse_weapon_and_numbers(text)
+    weapon, numbers = parse_weapon_and_numbers(text)
 
     # 四个数字：炮位X 炮位Y 目标X 目标Y，一次算完
     if len(numbers) == 4:
