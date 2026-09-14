@@ -124,6 +124,43 @@ def parse_coordinates(text: str) -> Optional[Point]:
     return Point(_to_float(numbers[0]), _to_float(numbers[1]))
 
 
+def extract_numbers(text: str) -> list[float]:
+    """提取文本中出现的所有数字。
+
+    支持带 x/y 标签、小数点或逗号小数，用于按顺序解析
+    '炮位X 炮位Y 目标X 目标Y' 这类多坐标输入。
+    """
+    if not text:
+        return []
+    return [_to_float(n) for n in _ALL_NUMBERS.findall(str(text))]
+
+
+def parse_weapon_and_numbers(text: str) -> tuple[Optional[Weapon], list[float]]:
+    """从命令文本中解析武器与后续数字。
+
+    首个词（或整串）能匹配到武器别名时识别为武器，其余部分提取数字。
+    返回 (weapon, numbers)，武器无法识别时 weapon 为 None。
+    """
+    text = (text or '').strip()
+    weapon: Optional[Weapon] = None
+    rest = text
+
+    if text:
+        first, _, tail = text.partition(' ')
+        candidate = registry.resolve(first)
+        if candidate is not None:
+            weapon = candidate
+            rest = tail
+        else:
+            whole = registry.resolve(text)
+            if whole is not None:
+                weapon = whole
+                rest = ''
+
+    numbers = extract_numbers(rest) if rest else []
+    return weapon, numbers
+
+
 def calculate(weapon: Weapon, origin: Point, target: Point) -> FireSolution:
     """根据炮位与目标坐标计算完整射击诸元。"""
     dx = target.x - origin.x

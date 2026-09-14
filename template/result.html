@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>射击诸元</title>
+    <style>
+        @font-face {
+            font-family: 'HarmonyOS Sans SC';
+            src: url('{{ font_url }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'HarmonyOS Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: transparent;
+            display: inline-block;
+        }
+
+        .card {
+            width: 720px;
+            padding: 26px 30px 22px;
+            background: linear-gradient(150deg, #1e242c 0%, #171b21 100%);
+            color: #e8ecf1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: {{ accent }};
+        }
+
+        .header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .weapon {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffffff;
+        }
+
+        .weapon .tag {
+            font-size: 13px;
+            font-weight: 400;
+            color: #8b97a5;
+            margin-left: 10px;
+            letter-spacing: 2px;
+        }
+
+        .badge {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+        }
+
+        .badge.in {
+            color: #0f1a12;
+            background: {{ range_color }};
+        }
+
+        .badge.out {
+            color: #1a0f0f;
+            background: #d86666;
+        }
+
+        .metrics {
+            display: flex;
+            gap: 16px;
+            margin: 22px 0 18px;
+        }
+
+        .metric {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            padding: 16px 18px;
+            text-align: center;
+        }
+
+        .metric .label {
+            font-size: 13px;
+            color: #8b97a5;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        .metric .value {
+            font-size: 34px;
+            font-weight: 700;
+            color: {{ accent }};
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .metric .value.small {
+            font-size: 26px;
+        }
+
+        .metric .sub {
+            font-size: 13px;
+            color: #7d8894;
+            margin-top: 7px;
+            min-height: 18px;
+        }
+
+        .delta {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .delta .item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 15px;
+            color: #aab4c0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 9px 0;
+        }
+
+        .delta .item b {
+            color: #e8ecf1;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+        }
+
+        .coords {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #9aa5b1;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .coords .pt b {
+            color: #d7dde4;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .coords .arrow {
+            color: {{ accent }};
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .range-hint {
+            font-size: 13px;
+            color: #7d8894;
+            margin-top: 10px;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="weapon">{{ weapon_name }}<span class="tag">射击诸元</span></div>
+            {% if in_range %}
+            <div class="badge in">射程内</div>
+            {% else %}
+            <div class="badge out">超出射程</div>
+            {% endif %}
+        </div>
+
+        <div class="metrics">
+            <div class="metric">
+                <div class="label">距离</div>
+                <div class="value">{{ distance_m }}<span style="font-size:16px;"> m</span></div>
+                <div class="sub">{{ distance_km }} km</div>
+            </div>
+            <div class="metric">
+                <div class="label">方位角</div>
+                <div class="value">{{ azimuth }}<span style="font-size:18px;">°</span></div>
+                <div class="sub">正北 0° 顺时针</div>
+            </div>
+            <div class="metric">
+                <div class="label">仰角</div>
+                <div class="value small">{{ mil_text }}</div>
+                <div class="sub">{{ mil_detail or 'MIL' }}</div>
+            </div>
+        </div>
+
+        <div class="delta">
+            <div class="item">ΔX <b>{{ dx_text }}</b></div>
+            <div class="item">ΔY <b>{{ dy_text }}</b></div>
+        </div>
+
+        <div class="coords">
+            <div class="pt">炮位 <b>X{{ origin_x }} · Y{{ origin_y }}</b></div>
+            <div class="arrow">➤</div>
+            <div class="pt">目标 <b>X{{ target_x }} · Y{{ target_y }}</b></div>
+        </div>
+
+        <div class="range-hint">有效射程 {{ range_text }}</div>
+    </div>
+</body>
+
+</html>

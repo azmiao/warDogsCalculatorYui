@@ -3,3 +3,4 @@ __pycache__/
 weapons.raw.json
 tests/ref_weapons.js
 tests/err.txt
+tests/out_*.png

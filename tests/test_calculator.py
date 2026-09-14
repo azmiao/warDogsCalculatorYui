@@ -159,6 +159,38 @@ def test_mil_text_format():
     print('[OK] MIL 文本格式化通过')
 
 
+def test_parse_weapon_and_numbers():
+    # 带武器 + 4 个坐标
+    weapon, nums = calc.parse_weapon_and_numbers('迫击炮 105 115 110 120')
+    assert weapon.id == 'mortar', weapon
+    assert nums == [105, 115, 110, 120], nums
+
+    # 带武器 + 2 个坐标
+    weapon, nums = calc.parse_weapon_and_numbers('sph2 105 115')
+    assert weapon.id == 'spg', weapon
+    assert nums == [105, 115], nums
+
+    # 无武器，仅坐标
+    weapon, nums = calc.parse_weapon_and_numbers('105 115 110 120')
+    assert weapon is None
+    assert nums == [105, 115, 110, 120], nums
+
+    # 仅武器
+    weapon, nums = calc.parse_weapon_and_numbers('榴弹炮')
+    assert weapon.id == 'spg', weapon
+    assert nums == [], nums
+
+    # 空输入
+    weapon, nums = calc.parse_weapon_and_numbers('')
+    assert weapon is None and nums == []
+
+    # 小数坐标
+    weapon, nums = calc.parse_weapon_and_numbers('迫击炮 105.5 115.25 110 120')
+    assert weapon.id == 'mortar'
+    assert nums == [105.5, 115.25, 110, 120], nums
+    print('[OK] 命令解析通过')
+
+
 if __name__ == '__main__':
     test_ballistics_matches_reference()
     test_distance_azimuth()
@@ -166,4 +198,5 @@ if __name__ == '__main__':
     test_coordinate_parsing()
     test_weapon_alias()
     test_mil_text_format()
+    test_parse_weapon_and_numbers()
     print('\n[PASS] 全部测试通过')
