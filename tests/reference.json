@@ -1,0 +1,210 @@
+{
+  "mortar": {
+    "50": {
+      "inRange": false,
+      "single": null,
+      "low": null,
+      "high": null
+    },
+    "80": {
+      "inRange": false,
+      "single": null,
+      "low": null,
+      "high": null
+    },
+    "132": {
+      "inRange": true,
+      "single": {
+        "mil": 850,
+        "minMil": 850,
+        "maxMil": 850
+      },
+      "low": null,
+      "high": null
+    },
+    "150": {
+      "inRange": true,
+      "single": {
+        "mil": 830.9090909090909,
+        "minMil": 830.9090909090909,
+        "maxMil": 830.9090909090909
+      },
+      "low": null,
+      "high": null
+    },
+    "200": {
+      "inRange": true,
+      "single": {
+        "mil": 788,
+        "minMil": 788,
+        "maxMil": 788
+      },
+      "low": null,
+      "high": null
+    },
+    "300": {
+      "inRange": true,
+      "single": {
+        "mil": 690,
+        "minMil": 690,
+        "maxMil": 690
+      },
+      "low": null,
+      "high": null
+    },
+    "400": {
+      "inRange": true,
+      "single": {
+        "mil": 583.3333333333334,
+        "minMil": 583.3333333333334,
+        "maxMil": 583.3333333333334
+      },
+      "low": null,
+      "high": null
+    },
+    "500": {
+      "inRange": true,
+      "single": {
+        "mil": 461.42857142857144,
+        "minMil": 461.42857142857144,
+        "maxMil": 461.42857142857144
+      },
+      "low": null,
+      "high": null
+    },
+    "600": {
+      "inRange": true,
+      "single": {
+        "mil": 315,
+        "minMil": 315,
+        "maxMil": 315
+      },
+      "low": null,
+      "high": null
+    },
+    "684": {
+      "inRange": true,
+      "single": {
+        "mil": 150,
+        "minMil": 150,
+        "maxMil": 150
+      },
+      "low": null,
+      "high": null
+    },
+    "700": {
+      "inRange": false,
+      "single": null,
+      "low": null,
+      "high": null
+    },
+    "1000": {
+      "inRange": false,
+      "single": null,
+      "low": null,
+      "high": null
+    }
+  },
+  "spg": {
+    "500": {
+      "inRange": false,
+      "single": null,
+      "low": null,
+      "high": null
+    },
+    "700": {
+      "inRange": false,
+      "single": null,
+      "low": null,
+      "high": null
+    },
+    "780": {
+      "inRange": true,
+      "single": null,
+      "low": null,
+      "high": {
+        "mil": 1390,
+        "minMil": 1390,
+        "maxMil": 1390
+      }
+    },
+    "1000": {
+      "inRange": true,
+      "single": null,
+      "low": null,
+      "high": {
+        "mil": 1339.7619047619048,
+        "minMil": 1339.7619047619048,
+        "maxMil": 1339.7619047619048
+      }
+    },
+    "1500": {
+      "inRange": true,
+      "single": null,
+      "low": {
+        "mil": 83.82978723404256,
+        "minMil": 83.82978723404256,
+        "maxMil": 83.82978723404256
+      },
+      "high": {
+        "mil": 1213.2432432432433,
+        "minMil": 1213.2432432432433,
+        "maxMil": 1213.2432432432433
+      }
+    },
+    "2000": {
+      "inRange": true,
+      "single": null,
+      "low": {
+        "mil": 206,
+        "minMil": 206,
+        "maxMil": 206
+      },
+      "high": {
+        "mil": 1056.7857142857142,
+        "minMil": 1056.7857142857142,
+        "maxMil": 1056.7857142857142
+      }
+    },
+    "2400": {
+      "inRange": true,
+      "single": null,
+      "low": {
+        "mil": 358.5,
+        "minMil": 358.5,
+        "maxMil": 358.5
+      },
+      "high": {
+        "mil": 877.0588235294117,
+        "minMil": 877.0588235294117,
+        "maxMil": 877.0588235294117
+      }
+    },
+    "2629": {
+      "inRange": true,
+      "single": null,
+      "low": {
+        "mil": 600,
+        "minMil": 600,
+        "maxMil": 600
+      },
+      "high": {
+        "mil": null,
+        "minMil": 610,
+        "maxMil": 620
+      }
+    },
+    "2700": {
+      "inRange": false,
+      "single": null,
+      "low": null,
+      "high": null
+    },
+    "3000": {
+      "inRange": false,
+      "single": null,
+      "low": null,
+      "high": null
+    }
+  }
+}
