@@ -1,12 +1,10 @@
 # warDogsCalculatorYui
 
-适用于YuiChyanBot[https://github.com/azmiao/YuiChyanBot] 的 WARDOGS(战狗)火炮射击诸元计算QQ机器人插件
+适用于 [YuiChyanBot](https://github.com/azmiao/YuiChyanBot) 的 WARDOGS(战狗) 火炮射击诸元计算 QQ机器人插件
 
-在群聊中通过对话输入炮位与目标坐标，即可算出**距离、方位角、MIL 仰角、ΔX/ΔY**，
-并以结果卡片图片的形式返回，支持 **L81 迫击炮**与 **SPH-2 自行火炮**。
-
-计算逻辑移植自开源项目 [apollyon-sys/wardogs-calculator](https://github.com/apollyon-sys/wardogs-calculator)，
-弹道插值算法与原始 JavaScript 实现保持一致。
+- 在群聊中通过对话输入炮位与目标坐标，即可算出**距离、方位角、MIL 仰角、ΔX/ΔY**，
+- 结果卡片图片的形式返回，支持 **L81 迫击炮**与 **SPH-2 自行火炮**
+- 计算逻辑参考自开源项目 [apollyon-sys/wardogs-calculator](https://github.com/apollyon-sys/wardogs-calculator)
 
 ## 效果预览
 
@@ -39,6 +37,8 @@
 | 全角标点 | `x97.43，y109.27 x100.5，y120.3` |
 | 括号包裹 | `(97.43, 109.27) (100.5, 120.3)` |
 
+> 推荐直接在游戏内标记坐标到聊天框里，会显示为`x97.43, y109.27`，然后可以直接快速复制给BOT进行计算
+
 ## 计算说明
 
 - 坐标换算：1 游戏坐标 = 100 米。
@@ -60,30 +60,20 @@
 └── tests/                # 测试与数据生成脚本
 ```
 
-## 测试
+## 使用方式
 
-```bash
-# 计算核心交叉验证（与参考项目原始 JS 函数比对）+ 逻辑单测
-python tests/test_calculator.py
+1. 将仓库 Git Clone 到 `YuiChyanBot\yuiChyan\plugins`插件目录下
+2. 在 `yuiChyan/config/extra_plugins.json5` 中新增一条配置：
 
-# 结果卡片渲染冒烟测试（需 Playwright 浏览器）
-python tests/test_render.py
+    ```json5
+    {
+        "warDogsCalculatorYui": "战狗火力计算器",
+    }
+    ```
 
-# 端到端往返测试（需先启动 BOT）
-python tests/e2e_client.py
-```
-
-## 注册
-
-在 `yuiChyan/config/extra_plugins.json5` 中启用：
-
-```json5
-{
-    "warDogsCalculatorYui": "战狗火力计算器",
-}
-```
+3. 重启BOT即可生效
 
 ## 许可
 
-本项目代码以 MIT 许可发布，见 [LICENSE](LICENSE)。
-WARDOGS 相关的游戏数据与素材版权归其各自所有者所有。
+- 本项目代码以 MIT 许可发布，见 [LICENSE](LICENSE)。
+- WARDOGS 相关的游戏数据与素材版权归其各自所有者所有。
