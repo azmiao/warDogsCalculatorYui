@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """渲染模块的独立冒烟测试：实际启动 Playwright 生成结果卡片图片。
 
 运行：python tests/test_render.py
@@ -28,12 +27,17 @@ if _PKG_NAME not in sys.modules:
     sys.modules[_PKG_NAME] = _pkg
 
 from warDogsCalculatorYui import calculator as calc
-from warDogsCalculatorYui.ballistics import registry
 from warDogsCalculatorYui import render as renderer
+from warDogsCalculatorYui.ballistics import registry
+
+
+def _write_bytes(path: str, data: bytes):
+    with open(path, 'wb') as f:
+        f.write(data)
 
 
 async def main():
-    from yuiChyan.resources import start_browser, close_browser
+    from yuiChyan.resources import close_browser, start_browser
 
     await start_browser()
     try:
@@ -47,8 +51,7 @@ async def main():
             img = await renderer.render_solution_image(sol)
             assert img and len(img) > 1000, f'{name} 渲染失败'
             out_path = os.path.join(_HERE, f'out_{name}.png')
-            with open(out_path, 'wb') as f:
-                f.write(img)
+            await asyncio.to_thread(_write_bytes, out_path, img)
             print(f'[OK] {name}: {len(img)} bytes -> {out_path}')
             print(renderer.format_solution_text(sol))
             print('-' * 40)

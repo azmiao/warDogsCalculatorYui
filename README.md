@@ -62,7 +62,7 @@ python tests/e2e_client.py
 
 ```json5
 {
-    "warDogsCalculatorYui": "战争猎犬火力计算器",
+    "warDogsCalculatorYui": "战狗火力计算器",
 }
 ```
 

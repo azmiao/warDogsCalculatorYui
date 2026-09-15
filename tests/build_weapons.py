@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """从参考项目导出的原始 weapons.raw.json 生成插件精简武器数据。
 
 仅做字段裁剪与中文名补全，弹道表原样保留以保证插值精度。
@@ -17,7 +16,7 @@ ZH_NAMES = {
 
 
 def main():
-    with open(os.path.join(_ROOT, 'weapons.raw.json'), 'r', encoding='utf-8') as f:
+    with open(os.path.join(_ROOT, 'weapons.raw.json'), encoding='utf-8') as f:
         raw = json.load(f)
 
     out = {'default': raw.get('default', 'mortar'), 'weapons': []}

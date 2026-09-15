@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """warDogsCalculatorYui - WARDOGS 火炮射击诸元计算。
 
 通过对话完成火炮位置计算，输出距离、方位角、MIL 仰角、ΔX/ΔY 与射程判定。
@@ -9,7 +8,7 @@
 """
 import time
 
-from yuiChyan import YuiChyan, CQEvent
+from yuiChyan import CQEvent, YuiChyan
 from yuiChyan.exception import CommandErrorException
 from yuiChyan.service import Service
 
@@ -45,6 +44,7 @@ async def _send_solution(bot: YuiChyan, ev: CQEvent, weapon, origin: Point, targ
     try:
         image_cq = await render_solution_cq(solution)
     except Exception as e:
+        # 兜底降级：渲染依赖浏览器/模板/字体，任何异常都不应阻断业务，统一回退为文本
         sv.logger.error(f'结果图片渲染失败，降级为文本输出：{type(e)} {e}')
         image_cq = None
     await bot.send(ev, image_cq or format_solution_text(solution))
@@ -88,7 +88,7 @@ async def fire_calc(bot: YuiChyan, ev: CQEvent):
     if len(numbers) not in (0, 2):
         raise CommandErrorException(
             ev, '坐标数量不正确，请提供 4 个数字（炮位X 炮位Y 目标X 目标Y），'
-                '例如：火力计算 迫击炮 105 115 110 120'
+                '例如：火力计算 迫击炮 105 115 110 120',
         )
 
     # 无坐标，等待炮位

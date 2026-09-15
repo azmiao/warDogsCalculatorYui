@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """射击诸元结果卡片渲染。
 
 使用框架全局 Playwright 浏览器将结果模板渲染为 PNG 图片；
@@ -6,7 +5,7 @@
 """
 import base64
 import os
-from typing import Optional
+from functools import lru_cache
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -25,17 +24,13 @@ _env = Environment(
 _ACCENT = '#5fd0c6'
 _OUT_ACCENT = '#e08a6a'
 
-# 本地中文字体 base64 缓存（set_content 下 file:// 不可靠，直接内嵌）
-_font_data_url: Optional[str] = None
 
-
+@lru_cache(maxsize=1)
 def _get_font_data_url() -> str:
-    global _font_data_url
-    if _font_data_url is None:
-        with open(font_path, 'rb') as f:
-            b64 = base64.b64encode(f.read()).decode('ascii')
-        _font_data_url = f'data:font/truetype;base64,{b64}'
-    return _font_data_url
+    """本地中文字体转 data URL（set_content 下 file:// 不可靠，直接内嵌）。"""
+    with open(font_path, 'rb') as f:
+        b64 = base64.b64encode(f.read()).decode('ascii')
+    return f'data:font/truetype;base64,{b64}'
 
 
 def _signed(value: float) -> str:
@@ -67,7 +62,7 @@ def _build_context(sol: FireSolution) -> dict:
     }
 
 
-async def render_solution_image(sol: FireSolution) -> Optional[bytes]:
+async def render_solution_image(sol: FireSolution) -> bytes | None:
     """渲染结果卡片为 PNG 字节，失败时返回 None。"""
     html = _env.get_template('result.html').render(**_build_context(sol))
 
@@ -83,7 +78,7 @@ async def render_solution_image(sol: FireSolution) -> Optional[bytes]:
         await page.close()
 
 
-async def render_solution_cq(sol: FireSolution) -> Optional[str]:
+async def render_solution_cq(sol: FireSolution) -> str | None:
     """渲染结果卡片并封装为 CQ 图片消息段，失败时返回 None。"""
     img_bytes = await render_solution_image(sol)
     if not img_bytes:
@@ -101,8 +96,8 @@ def format_solution_text(sol: FireSolution) -> str:
         f'方位角：{sol.azimuth:.1f}°',
         f'仰角：{sol.mil_text}' + (f'（{sol.mil_detail}）' if sol.mil_detail else ''),
         f'ΔX：{_signed(sol.dx_m)}　ΔY：{_signed(sol.dy_m)}',
-        f'炮位：X{sol.origin.x:g} · Y{sol.origin.y:g} ➤ '
-        f'目标：X{sol.target.x:g} · Y{sol.target.y:g}',
+        (f'炮位：X{sol.origin.x:g} · Y{sol.origin.y:g} ➤ '
+         f'目标：X{sol.target.x:g} · Y{sol.target.y:g}'),
         f'有效射程：{round(sol.min_range_m)}–{round(sol.max_range_m)} m',
     ]
     return '\n'.join(lines)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """端到端测试客户端：模拟 OneBot 反向 WS 客户端，保持连接完成一次完整往返。
 
 需先启动 BOT（runYuiChyan.py），再运行本脚本。

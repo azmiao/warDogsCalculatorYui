@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """射击诸元计算核心。
 
 计算公式严格对齐参考项目 apollyon-sys/wardogs-calculator：
@@ -11,7 +10,6 @@
 import math
 import re
 from dataclasses import dataclass
-from typing import Optional
 
 from .ballistics import Weapon, registry
 
@@ -22,6 +20,7 @@ METERS_PER_UNIT = 100
 @dataclass
 class Point:
     """地图坐标点。"""
+
     x: float
     y: float
 
@@ -29,6 +28,7 @@ class Point:
 @dataclass
 class FireSolution:
     """一次完整的射击诸元计算结果。"""
+
     weapon: Weapon
     origin: Point
     target: Point
@@ -101,7 +101,7 @@ def _to_float(raw: str) -> float:
     return float(str(raw).replace(',', '.'))
 
 
-def parse_coordinates(text: str) -> Optional[Point]:
+def parse_coordinates(text: str) -> Point | None:
     """解析用户输入的坐标。
 
     支持 'X105 Y115'、'x:105, y:115'、'105 115'、'105,115' 等写法。
@@ -135,14 +135,14 @@ def extract_numbers(text: str) -> list[float]:
     return [_to_float(n) for n in _ALL_NUMBERS.findall(str(text))]
 
 
-def parse_weapon_and_numbers(text: str) -> tuple[Optional[Weapon], list[float]]:
+def parse_weapon_and_numbers(text: str) -> tuple[Weapon | None, list[float]]:
     """从命令文本中解析武器与后续数字。
 
     首个词（或整串）能匹配到武器别名时识别为武器，其余部分提取数字。
     返回 (weapon, numbers)，武器无法识别时 weapon 为 None。
     """
     text = (text or '').strip()
-    weapon: Optional[Weapon] = None
+    weapon: Weapon | None = None
     rest = text
 
     if text:

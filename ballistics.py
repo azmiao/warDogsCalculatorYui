@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """弹道表加载与 MIL 仰角插值。
 
 算法严格移植自参考项目 apollyon-sys/wardogs-calculator 的 js/features/weapons.js：
@@ -9,7 +8,6 @@
 """
 import json
 import os
-from typing import Optional
 
 _DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weapons.json')
 
@@ -50,7 +48,7 @@ def _closest_mil(values: list[float], target: float) -> float:
 
 
 def interpolate_ballistic_table(table: list[list[float]],
-                                distance_meters: float) -> Optional[dict]:
+                                distance_meters: float) -> dict | None:
     """按距离插值弹道表，返回 {'mil', 'minMil', 'maxMil'}，无法计算时返回 None。"""
     table = _normalize_table(table)
     if not table or distance_meters is None:
@@ -97,8 +95,8 @@ class Weapon:
         self.names: dict = raw.get('names', {})
         self.min_range_km: float = float(raw['minRangeKm'])
         self.max_range_km: float = float(raw['maxRangeKm'])
-        self.min_elevation_mil: Optional[float] = raw.get('minElevationMil')
-        self.max_elevation_mil: Optional[float] = raw.get('maxElevationMil')
+        self.min_elevation_mil: float | None = raw.get('minElevationMil')
+        self.max_elevation_mil: float | None = raw.get('maxElevationMil')
         ballistics = raw.get('ballistics') or {}
         self.single = _normalize_table(ballistics.get('single'))
         self.low = _normalize_table(ballistics.get('low'))
@@ -138,7 +136,7 @@ class WeaponRegistry:
     """武器注册表，负责加载与别名查询。"""
 
     def __init__(self, data_path: str = _DATA_PATH):
-        with open(data_path, 'r', encoding='utf-8') as f:
+        with open(data_path, encoding='utf-8') as f:
             data = json.load(f)
         self.weapons: dict[str, Weapon] = {
             item['id']: Weapon(item) for item in data.get('weapons', [])
@@ -160,10 +158,10 @@ class WeaponRegistry:
             for alias in manual.get(wid, ()):
                 self._aliases[alias.lower()] = wid
 
-    def get(self, weapon_id: str) -> Optional[Weapon]:
+    def get(self, weapon_id: str) -> Weapon | None:
         return self.weapons.get(weapon_id)
 
-    def resolve(self, text: str) -> Optional[Weapon]:
+    def resolve(self, text: str) -> Weapon | None:
         """将用户输入的武器名/别名解析为武器，无法识别返回 None。"""
         if not text:
             return None
@@ -172,7 +170,7 @@ class WeaponRegistry:
         return self.weapons.get(wid) if wid else None
 
     @property
-    def default(self) -> Optional[Weapon]:
+    def default(self) -> Weapon | None:
         return self.weapons.get(self.default_id)
 
     def all_names(self) -> list[str]:

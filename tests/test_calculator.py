@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """计算核心的交叉验证测试。
 
 reference.json 由 tests/gen_reference.js 调用参考项目原始 JS 函数生成，
@@ -28,7 +27,7 @@ if _PKG_NAME not in sys.modules:
 from warDogsCalculatorYui import calculator as calc
 from warDogsCalculatorYui.ballistics import registry
 
-with open(os.path.join(_HERE, 'reference.json'), 'r', encoding='utf-8') as f:
+with open(os.path.join(_HERE, 'reference.json'), encoding='utf-8') as f:
     REFERENCE = json.load(f)
 
 
@@ -48,7 +47,7 @@ def _check_solution(py_sol, js_sol, ctx):
     for key in ('mil', 'minMil', 'maxMil'):
         if not _close(py_sol[key], js_sol[key]):
             raise AssertionError(
-                f'{ctx}: {key} 不一致 py={py_sol[key]} js={js_sol[key]}'
+                f'{ctx}: {key} 不一致 py={py_sol[key]} js={js_sol[key]}',
             )
 
 
