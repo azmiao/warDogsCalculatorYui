@@ -1,6 +1,6 @@
 # warDogsCalculatorYui
 
-YuiChyanBot 的 WARDOGS 火炮射击诸元计算插件。
+适用于YuiChyanBot[https://github.com/azmiao/YuiChyanBot] 的 WARDOGS(战狗)火炮射击诸元计算QQ机器人插件
 
 在群聊中通过对话输入炮位与目标坐标，即可算出**距离、方位角、MIL 仰角、ΔX/ΔY**，
 并以结果卡片图片的形式返回，支持 **L81 迫击炮**与 **SPH-2 自行火炮**。
