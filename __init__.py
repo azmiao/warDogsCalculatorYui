@@ -18,7 +18,7 @@ from .render import format_solution_text, render_solution_cq
 sv = Service('warDogsCalculatorYui', help_cmd='火力计算帮助')
 
 # 触发前缀（最长前缀匹配，'火力计算帮助' 会被 help_cmd 单独消费）
-TRIGGERS = ('火力计算', '火炮计算')
+TRIGGERS = ('火力计算', '火炮计算', 'hljs')
 
 _WEAPON_HINT = '、'.join(registry.all_names())
 
