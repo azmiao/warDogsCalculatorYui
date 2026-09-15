@@ -178,6 +178,42 @@
             margin-top: 10px;
             text-align: right;
         }
+
+        .lock-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 16px 0 0;
+            padding: 11px 16px;
+            border-radius: 10px;
+            background: rgba(255, 197, 92, 0.12);
+            border: 1px solid rgba(255, 197, 92, 0.45);
+            color: #ffcf7a;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .lock-banner .icon {
+            font-size: 18px;
+        }
+
+        .lock-banner .hint {
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: 400;
+            color: #c9a86a;
+        }
+
+        .coords .pt.locked b {
+            color: #ffcf7a;
+        }
+
+        .coords .pt .lock-mark {
+            color: #ffcf7a;
+            font-size: 13px;
+            margin-left: 4px;
+        }
     </style>
 </head>
 
@@ -191,6 +227,14 @@
             <div class="badge out">超出射程</div>
             {% endif %}
         </div>
+
+        {% if origin_locked %}
+        <div class="lock-banner">
+            <span class="icon">🔒</span>
+            <span>炮位坐标已锁定：X{{ origin_x }} · Y{{ origin_y }}</span>
+            <span class="hint">更换位置后请重新锁定</span>
+        </div>
+        {% endif %}
 
         <div class="metrics">
             <div class="metric">
@@ -216,7 +260,7 @@
         </div>
 
         <div class="coords">
-            <div class="pt">炮位 <b>X{{ origin_x }} · Y{{ origin_y }}</b></div>
+            <div class="pt{% if origin_locked %} locked{% endif %}">炮位 <b>X{{ origin_x }} · Y{{ origin_y }}</b>{% if origin_locked %}<span class="lock-mark">🔒</span>{% endif %}</div>
             <div class="arrow">➤</div>
             <div class="pt">目标 <b>X{{ target_x }} · Y{{ target_y }}</b></div>
         </div>

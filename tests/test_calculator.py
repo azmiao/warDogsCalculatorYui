@@ -231,6 +231,50 @@ def test_parse_weapon_and_points():
     print('[OK] 命令解析通过')
 
 
+def test_parse_command():
+    # 常规计算：两个坐标点
+    cmd = calc.parse_command('105 115 110 120')
+    assert cmd.action == 'calc', cmd
+    assert cmd.weapon is None
+    assert len(cmd.points) == 2, cmd.points
+
+    # 常规计算：带武器
+    cmd = calc.parse_command('榴弹炮 100 100 115 120')
+    assert cmd.action == 'calc'
+    assert cmd.weapon.id == 'spg', cmd.weapon
+
+    # 单坐标点也归为 calc（由上层决定是否使用锁定炮位）
+    cmd = calc.parse_command('110 120')
+    assert cmd.action == 'calc'
+    assert len(cmd.points) == 1, cmd.points
+
+    # 锁定：带坐标
+    cmd = calc.parse_command('锁定 105 115')
+    assert cmd.action == 'lock', cmd
+    assert len(cmd.points) == 1, cmd.points
+    assert _close(cmd.points[0].x, 105) and _close(cmd.points[0].y, 115), cmd.points
+
+    # 锁定：带 x/y 标签坐标
+    cmd = calc.parse_command('锁定 x97.43, y109.27')
+    assert cmd.action == 'lock'
+    assert _close(cmd.points[0].x, 97.43), cmd.points
+
+    # 锁定：不带坐标 -> 查看当前锁定
+    cmd = calc.parse_command('锁定')
+    assert cmd.action == 'show', cmd
+    assert cmd.points == [], cmd.points
+
+    # 解锁
+    cmd = calc.parse_command('解锁')
+    assert cmd.action == 'unlock', cmd
+
+    # 查看锁定的其他写法
+    assert calc.parse_command('查看锁定').action == 'show'
+    assert calc.parse_command('锁定状态').action == 'show'
+
+    print('[OK] 命令解析（锁定/解锁/查看/计算）通过')
+
+
 if __name__ == '__main__':
     test_ballistics_matches_reference()
     test_distance_azimuth()
@@ -240,4 +284,5 @@ if __name__ == '__main__':
     test_weapon_alias()
     test_mil_text_format()
     test_parse_weapon_and_points()
+    test_parse_command()
     print('\n[PASS] 全部测试通过')

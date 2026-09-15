@@ -59,6 +59,7 @@ def _build_context(sol: FireSolution) -> dict:
         'target_x': f'{sol.target.x:g}',
         'target_y': f'{sol.target.y:g}',
         'range_text': f'{round(sol.min_range_m)}–{round(sol.max_range_m)} m',
+        'origin_locked': sol.origin_locked,
     }
 
 
@@ -92,12 +93,20 @@ def format_solution_text(sol: FireSolution) -> str:
     status = '射程内' if sol.in_range else '超出射程'
     lines = [
         f'【{sol.weapon.name}】射击诸元（{status}）',
+    ]
+    if sol.origin_locked:
+        lines.append(
+            f'🔒 炮位已锁定：X{sol.origin.x:g} · Y{sol.origin.y:g}'
+            '（如需更换请重新锁定或解锁）'
+        )
+    lines += [
         f'距离：{round(sol.distance_m)} m（{sol.distance_km:.2f} km）',
         f'方位角：{sol.azimuth:.1f}°',
         f'仰角：{sol.mil_text}' + (f'（{sol.mil_detail}）' if sol.mil_detail else ''),
         f'ΔX：{_signed(sol.dx_m)}　ΔY：{_signed(sol.dy_m)}',
-        (f'炮位：X{sol.origin.x:g} · Y{sol.origin.y:g} ➤ '
-         f'目标：X{sol.target.x:g} · Y{sol.target.y:g}'),
+        (f'炮位：X{sol.origin.x:g} · Y{sol.origin.y:g}'
+         + ('（已锁定）' if sol.origin_locked else '')
+         + f' ➤ 目标：X{sol.target.x:g} · Y{sol.target.y:g}'),
         f'有效射程：{round(sol.min_range_m)}–{round(sol.max_range_m)} m',
     ]
     return '\n'.join(lines)

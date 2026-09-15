@@ -42,6 +42,7 @@ class FireSolution:
     min_range_m: float
     max_range_m: float
     solutions: dict
+    origin_locked: bool = False
 
     @property
     def mil_text(self) -> str:
@@ -168,7 +169,59 @@ def parse_weapon_and_points(text: str) -> tuple[Weapon | None, list[Point]]:
     return weapon, points
 
 
-def calculate(weapon: Weapon, origin: Point, target: Point) -> FireSolution:
+# 锁定相关保留字
+_LOCK_WORD = '锁定'
+_UNLOCK_WORD = '解锁'
+_SHOW_WORDS = ('查看锁定', '锁定状态')
+
+
+@dataclass
+class ParsedCommand:
+    """命令解析结果。
+
+    action 取值：
+    - 'calc'：常规计算（携带武器与坐标点）
+    - 'lock'：锁定炮位（points 恰为一个坐标点）
+    - 'unlock'：解除锁定
+    - 'show'：查看当前锁定
+    """
+
+    action: str
+    weapon: Weapon | None
+    points: list[Point]
+
+
+def parse_command(text: str) -> ParsedCommand:
+    """解析命令文本为动作、武器与坐标点。
+
+    优先级：
+    1. '解锁' 开头 -> unlock
+    2. '锁定' 开头：带坐标 -> lock；不带坐标 -> show（查看当前锁定）
+    3. '查看锁定' / '锁定状态' 开头 -> show
+    4. 其余 -> calc
+    """
+    text = (text or '').strip()
+
+    if text.startswith(_UNLOCK_WORD):
+        return ParsedCommand('unlock', None, [])
+
+    if text.startswith(_LOCK_WORD):
+        rest = text[len(_LOCK_WORD):].strip()
+        points = extract_points(rest) if rest else []
+        if points:
+            return ParsedCommand('lock', None, points)
+        return ParsedCommand('show', None, [])
+
+    for word in _SHOW_WORDS:
+        if text.startswith(word):
+            return ParsedCommand('show', None, [])
+
+    weapon, points = parse_weapon_and_points(text)
+    return ParsedCommand('calc', weapon, points)
+
+
+def calculate(weapon: Weapon, origin: Point, target: Point,
+              origin_locked: bool = False) -> FireSolution:
     """根据炮位与目标坐标计算完整射击诸元。"""
     dx = target.x - origin.x
     dy = target.y - origin.y
@@ -194,4 +247,5 @@ def calculate(weapon: Weapon, origin: Point, target: Point) -> FireSolution:
         min_range_m=weapon.min_range_km * 1000,
         max_range_m=weapon.max_range_km * 1000,
         solutions=solutions,
+        origin_locked=origin_locked,
     )
