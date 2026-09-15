@@ -8,6 +8,10 @@ YuiChyanBot 的 WARDOGS 火炮射击诸元计算插件。
 计算逻辑移植自开源项目 [apollyon-sys/wardogs-calculator](https://github.com/apollyon-sys/wardogs-calculator)，
 弹道插值算法与原始 JavaScript 实现保持一致。
 
+## 效果预览
+
+![preview.png](preview.png)
+
 ## 使用
 
 | 命令 | 说明 |
