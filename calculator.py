@@ -9,6 +9,7 @@
 """
 import math
 import re
+import unicodedata
 from dataclasses import dataclass
 
 from .ballistics import Weapon, registry
@@ -89,57 +90,63 @@ def _format_solution(solution: dict) -> str:
     return str(_js_round(solution.get('mil', min_mil)))
 
 
-# 数字（支持正负号、小数、小数点或逗号分隔）
+# 单个数字：支持正负号与小数（小数点或逗号作小数分隔符）
 _NUM_PATTERN = r'[+-]?\d+(?:[.,]\d+)?'
-# 带标签的坐标：x105 y115 或 x:105, y:115
-_LABELED_X = re.compile(rf'(?:^|[^a-z])x\s*[:=]?\s*({_NUM_PATTERN})', re.IGNORECASE)
-_LABELED_Y = re.compile(rf'(?:^|[^a-z])y\s*[:=]?\s*({_NUM_PATTERN})', re.IGNORECASE)
-_ALL_NUMBERS = re.compile(_NUM_PATTERN)
+# 带 x/y 标签的坐标，如 x97.43、y109.27、x:97、y=109（前面不能紧跟字母，避免误匹配单词）
+_LABEL_TOKEN = re.compile(rf'(?<![a-z])([xy])\s*[:=]?\s*({_NUM_PATTERN})', re.IGNORECASE)
+_NUMBER = re.compile(_NUM_PATTERN)
+
+
+def _normalize(text: str) -> str:
+    """全角转半角，统一逗号、冒号、括号等标点，便于容错解析。"""
+    return unicodedata.normalize('NFKC', str(text))
 
 
 def _to_float(raw: str) -> float:
     return float(str(raw).replace(',', '.'))
 
 
-def parse_coordinates(text: str) -> Point | None:
-    """解析用户输入的坐标。
+def extract_points(text: str) -> list[Point]:
+    """从文本中解析坐标点列表，尽量兼容各种不规范输入。
 
-    支持 'X105 Y115'、'x:105, y:115'、'105 115'、'105,115' 等写法。
-    无法解析出两个数字时返回 None。
-    """
-    if not text:
-        return None
-    text = str(text).strip()
-    if not text:
-        return None
+    解析优先级：
+    1. 带 x/y 标签时按标签语义配对（与出现顺序无关）
+       例：'x97.43, y109.27'、'x97.43 y109.27'、'x:97.43, y:109.27'
+    2. 无标签时按数字出现顺序两两配对
+       例：'97.43 109.27'、'97.43,109.27'、'97.43, 109.27'
 
-    x_match = _LABELED_X.search(text)
-    y_match = _LABELED_Y.search(text)
-    if x_match and y_match:
-        return Point(_to_float(x_match.group(1)), _to_float(y_match.group(1)))
-
-    numbers = _ALL_NUMBERS.findall(text)
-    if len(numbers) != 2:
-        return None
-    return Point(_to_float(numbers[0]), _to_float(numbers[1]))
-
-
-def extract_numbers(text: str) -> list[float]:
-    """提取文本中出现的所有数字。
-
-    支持带 x/y 标签、小数点或逗号小数，用于按顺序解析
-    '炮位X 炮位Y 目标X 目标Y' 这类多坐标输入。
+    多个坐标点可用空格、逗号、分号、换行等任意分隔，坐标数量为偶数时返回。
     """
     if not text:
         return []
-    return [_to_float(n) for n in _ALL_NUMBERS.findall(str(text))]
+    text = _normalize(text)
+
+    # 优先按 x/y 标签配对，避免出现顺序打乱导致的错配
+    labels = _LABEL_TOKEN.findall(text)
+    if labels:
+        xs = [_to_float(v) for k, v in labels if k.lower() == 'x']
+        ys = [_to_float(v) for k, v in labels if k.lower() == 'y']
+        if xs and len(xs) == len(ys):
+            return [Point(x, y) for x, y in zip(xs, ys)]
+
+    # 无标签（或标签不完整）：按数字顺序两两配对
+    numbers = [_to_float(n) for n in _NUMBER.findall(text)]
+    if len(numbers) >= 2 and len(numbers) % 2 == 0:
+        return [Point(numbers[i], numbers[i + 1]) for i in range(0, len(numbers), 2)]
+    return []
 
 
-def parse_weapon_and_numbers(text: str) -> tuple[Weapon | None, list[float]]:
-    """从命令文本中解析武器与后续数字。
+def parse_coordinates(text: str) -> Point | None:
+    """解析单个坐标点，无法解析出恰好一个点时返回 None。"""
+    points = extract_points(text)
+    return points[0] if len(points) == 1 else None
 
-    首个词（或整串）能匹配到武器别名时识别为武器，其余部分提取数字。
-    返回 (weapon, numbers)，武器无法识别时 weapon 为 None。
+
+def parse_weapon_and_points(text: str) -> tuple[Weapon | None, list[Point]]:
+    """从命令文本中解析武器与坐标点。
+
+    首个词（或整串）能匹配到武器别名时识别为武器，其余部分解析坐标。
+    返回 (weapon, points)，武器无法识别时 weapon 为 None。
     """
     text = (text or '').strip()
     weapon: Weapon | None = None
@@ -157,8 +164,8 @@ def parse_weapon_and_numbers(text: str) -> tuple[Weapon | None, list[float]]:
                 weapon = whole
                 rest = ''
 
-    numbers = extract_numbers(rest) if rest else []
-    return weapon, numbers
+    points = extract_points(rest) if rest else []
+    return weapon, points
 
 
 def calculate(weapon: Weapon, origin: Point, target: Point) -> FireSolution:

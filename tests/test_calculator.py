@@ -116,24 +116,65 @@ def test_range_boundary():
 
 
 def test_coordinate_parsing():
-    cases = [
+    # 单个坐标点（各种不规范写法）
+    single_cases = [
         ('105 115', calc.Point(105, 115)),
         ('X105 Y115', calc.Point(105, 115)),
         ('x:105, y:115', calc.Point(105, 115)),
         ('x105.5 y115.25', calc.Point(105.5, 115.25)),
         ('x105.5,y115.25', calc.Point(105.5, 115.25)),
+        ('x97.43, y109.27', calc.Point(97.43, 109.27)),
         ('105\t115', calc.Point(105, 115)),
+        ('y109.27 x97.43', calc.Point(97.43, 109.27)),  # 标签乱序也能按语义配对
     ]
-    for text, expected in cases:
+    for text, expected in single_cases:
         point = calc.parse_coordinates(text)
         assert point is not None, f'{text!r} 解析失败'
         assert _close(point.x, expected.x) and _close(point.y, expected.y), \
             f'{text!r} -> {point}, 期望 {expected}'
 
-    # 与参考项目一致：逗号是小数点分隔符，纯数字输入需恰好两个数
-    for bad in ['', 'abc', '105', '1 2 3', 'x105', '105,115']:
+    # 无法解析为一个点的输入
+    for bad in ['', 'abc', '105', '1 2 3', 'x105', 'x105 y']:
         assert calc.parse_coordinates(bad) is None, f'{bad!r} 不应解析成功'
-    print('[OK] 坐标解析通过')
+    print('[OK] 单坐标解析通过')
+
+
+def test_extract_points():
+    """覆盖用户从游戏复制的各种坐标写法，均应解析出两个点。"""
+    p1 = (97.43, 109.27)
+    p2 = (100.5, 120.3)
+    cases = [
+        # 带 x/y 标签，空格 / 逗号 / 分号 / 换行分隔
+        'x97.43, y109.27 x100.5, y120.3',
+        'x97.43, y109.27, x100.5, y120.3',
+        'x97.43,y109.27,x100.5,y120.3',
+        'x97.43 y109.27 x100.5 y120.3',
+        'x97.43, y109.27\nx100.5, y120.3',
+        'X97.43, Y109.27 X100.5, Y120.3',
+        'x:97.43 y:109.27 x:100.5 y:120.3',
+        # 无标签，纯数字两两配对
+        '97.43 109.27 100.5 120.3',
+        '97.43,109.27,100.5,120.3',
+        '97.43, 109.27, 100.5, 120.3',
+        # 全角标点
+        'x97.43，y109.27 x100.5，y120.3',
+        # 括号包裹
+        '(97.43, 109.27) (100.5, 120.3)',
+    ]
+    for text in cases:
+        points = calc.extract_points(text)
+        assert len(points) == 2, f'{text!r} -> {points}'
+        assert _close(points[0].x, p1[0]) and _close(points[0].y, p1[1]), \
+            f'{text!r} 第一点错误 -> {points[0]}'
+        assert _close(points[1].x, p2[0]) and _close(points[1].y, p2[1]), \
+            f'{text!r} 第二点错误 -> {points[1]}'
+
+    # 数量不足或为奇数时不应解析出两个点
+    for bad in ['', '97.43', '97.43 109.27 100.5']:
+        assert len(calc.extract_points(bad)) != 2, f'{bad!r} 不应解析出两个坐标点'
+    # 恰好一个完整坐标点
+    assert len(calc.extract_points('x97.43 y109.27')) == 1
+    print('[OK] 多坐标容错解析通过')
 
 
 def test_weapon_alias():
@@ -158,35 +199,35 @@ def test_mil_text_format():
     print('[OK] MIL 文本格式化通过')
 
 
-def test_parse_weapon_and_numbers():
-    # 带武器 + 4 个坐标
-    weapon, nums = calc.parse_weapon_and_numbers('迫击炮 105 115 110 120')
+def test_parse_weapon_and_points():
+    # 带武器 + 两个坐标点
+    weapon, points = calc.parse_weapon_and_points('迫击炮 105 115 110 120')
     assert weapon.id == 'mortar', weapon
-    assert nums == [105, 115, 110, 120], nums
+    assert [(p.x, p.y) for p in points] == [(105, 115), (110, 120)], points
 
-    # 带武器 + 2 个坐标
-    weapon, nums = calc.parse_weapon_and_numbers('sph2 105 115')
+    # 带武器 + x/y 标签坐标
+    weapon, points = calc.parse_weapon_and_points('sph2 x97.43, y109.27 x100.5, y120.3')
     assert weapon.id == 'spg', weapon
-    assert nums == [105, 115], nums
+    assert _close(points[0].x, 97.43) and _close(points[1].y, 120.3), points
 
     # 无武器，仅坐标
-    weapon, nums = calc.parse_weapon_and_numbers('105 115 110 120')
+    weapon, points = calc.parse_weapon_and_points('105 115 110 120')
     assert weapon is None
-    assert nums == [105, 115, 110, 120], nums
+    assert len(points) == 2, points
 
     # 仅武器
-    weapon, nums = calc.parse_weapon_and_numbers('榴弹炮')
+    weapon, points = calc.parse_weapon_and_points('榴弹炮')
     assert weapon.id == 'spg', weapon
-    assert nums == [], nums
+    assert points == [], points
 
     # 空输入
-    weapon, nums = calc.parse_weapon_and_numbers('')
-    assert weapon is None and nums == []
+    weapon, points = calc.parse_weapon_and_points('')
+    assert weapon is None and points == []
 
     # 小数坐标
-    weapon, nums = calc.parse_weapon_and_numbers('迫击炮 105.5 115.25 110 120')
+    weapon, points = calc.parse_weapon_and_points('迫击炮 105.5 115.25 110 120')
     assert weapon.id == 'mortar'
-    assert nums == [105.5, 115.25, 110, 120], nums
+    assert [(p.x, p.y) for p in points] == [(105.5, 115.25), (110, 120)], points
     print('[OK] 命令解析通过')
 
 
@@ -195,7 +236,8 @@ if __name__ == '__main__':
     test_distance_azimuth()
     test_range_boundary()
     test_coordinate_parsing()
+    test_extract_points()
     test_weapon_alias()
     test_mil_text_format()
-    test_parse_weapon_and_numbers()
+    test_parse_weapon_and_points()
     print('\n[PASS] 全部测试通过')
